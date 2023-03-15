@@ -4,6 +4,7 @@ from rest_framework import (
 )
 from westudy.models import University
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView
 from westudy.permissions import RegisterWithoutAuthPermission, IsAdminUser
@@ -30,10 +31,7 @@ class UniversityGetView(generics.RetrieveAPIView):
 
     def get_object(self):
         university_id = self.kwargs.get('id')
-        try:
-            university = University.objects.get(id=university_id)
-        except University.DoesNotExist:
-            raise Response({'message': 'University not found'}, status=status.HTTP_404_NOT_FOUND)
+        university = get_object_or_404(University, id=university_id)
         return university
         
 
