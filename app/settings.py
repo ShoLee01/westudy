@@ -30,6 +30,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['api.westudy.global', '3.85.123.242', 'localhost']
 
+# CORS Settings
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+X_FRAME_OPTIONS = "SAMEORIGIN"
 
 # Application definition
 
@@ -233,9 +239,6 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
-# CORS Settings
-
-CORS_ALLOW_ALL_ORIGINS = True
 
 AWS_ACCESS_KEY_ID = 'AKIA5F5H5ZWNXEPFGFGX'
 AWS_SECRET_ACCESS_KEY = '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'
