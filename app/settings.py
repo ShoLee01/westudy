@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-bc9)h+z&=ikl8z14hhi_ya1reb@91*a+)0r&0()!*2%y7ps1(&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["3.85.123.242", ".westudy.global"]
+ALLOWED_HOSTS = ['api.westudy.global', '3.85.123.242', 'localhost']
 
 
 # Application definition
