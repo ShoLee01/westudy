@@ -8,8 +8,10 @@ from westudy.models import Course, University, Modality, Category, TypeOfProgram
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, serializers
+import datetime
 from westudy.permissions import RegisterWithoutAuthPermission, IsAdminUser
 from rest_framework.pagination import PageNumberPagination
+from django.db.models import F, ExpressionWrapper, fields
 
 from .serializers import (
     CourseSerializer,
@@ -213,12 +215,18 @@ class CourseFilterView(generics.ListAPIView):
     pagination_class = PageNumberPagination
     pagination_class.page_size = 10
     
+    
     def get_queryset(self):
         queryset = Course.objects.all()
         university = self.request.query_params.getlist('university', [])
         category = self.request.query_params.getlist('category', [])
         modality = self.request.query_params.getlist('modality', [])
         type_of_program = self.request.query_params.getlist('typeofprogram', [])
+        min_price = self.request.query_params.get('min_price', None)
+        max_price = self.request.query_params.get('max_price', None)
+        min_duration = self.request.query_params.get('min_duration', None)
+        max_duration = self.request.query_params.get('max_duration', None)
+
         if university:
             queryset = reduce(lambda qs, p: qs & qs.filter(university=p), university, queryset)
         if category:
@@ -227,5 +235,21 @@ class CourseFilterView(generics.ListAPIView):
             queryset = reduce(lambda qs, p: qs & qs.filter(modality=p), modality, queryset)
         if type_of_program:
             queryset = reduce(lambda qs, p: qs & qs.filter(type_of_program=p), type_of_program, queryset)
+
+        if min_price is not None:
+            queryset = queryset.filter(price__gte=min_price)
+        if max_price is not None:
+            queryset = queryset.filter(price__lte=max_price)
+    
+        if min_duration is not None:
+            min_duration = int(min_duration)
+        if max_duration is not None:
+            max_duration = int(max_duration)
+
+        duration_expression = ExpressionWrapper(F('end_of_course') - F('start_of_course'), output_field=fields.DurationField())
+        if min_duration is not None:
+            queryset = queryset.annotate(duration=duration_expression).filter(duration__gte=datetime.timedelta(days=min_duration))
+        if max_duration is not None:
+            queryset = queryset.annotate(duration=duration_expression).filter(duration__lte=datetime.timedelta(days=max_duration))
 
         return queryset.distinct()
