@@ -38,4 +38,5 @@ urlpatterns = [
     path("modality/", include("modality.urls"), name="modality"),
     path("type-of-program/", include("typeofprogram.urls"), name="typeofprogram"),
     path("schedule/", include("schedule.urls"), name="schedule"),
+    path("shift/", include("shift.urls"), name="shift"),
 ]

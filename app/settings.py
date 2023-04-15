@@ -28,7 +28,7 @@ SECRET_KEY = "django-insecure-bc9)h+z&=ikl8z14hhi_ya1reb@91*a+)0r&0()!*2%y7ps1(&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['api.westudy.global', '3.85.123.242', 'localhost']
+#ALLOWED_HOSTS = ['api.westudy.global', '3.85.123.242', 'localhost']
 
 # CORS Settings
 
@@ -46,8 +46,8 @@ INTERNAL_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    
 ]
-
 
 PROJECT_APPS = [
     "westudy",
@@ -58,6 +58,7 @@ PROJECT_APPS = [
     "modality",
     "typeofprogram",
     "schedule",
+    "shift",
 ]
 
 THIRD_PARTY_APPS = [
@@ -108,7 +109,7 @@ WSGI_APPLICATION = "app.wsgi.application"
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
-    "default": {
+    "old_default": {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'westudydb',
         'USER': 'westudyaccesspro',
@@ -116,7 +117,7 @@ DATABASES = {
         'HOST': 'westudyapp.celjmnegcr8z.us-east-1.rds.amazonaws.com',
         'PORT': '5432',
     },
-    "old_default": {
+    "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
     }
@@ -168,7 +169,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 AUTH_USER_MODEL = (
-    "westudy.User"  # Cambiar el modelo de usuario para decirles que usen core
+    "westudy.User" # Cambiar el modelo de usuario para decirles que usen core
 )
 
 REST_FRAMEWORK = {
@@ -179,12 +180,19 @@ REST_FRAMEWORK = {
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
+        'westudy.jwt.CombinedJWTAuthentication',
         "rest_framework_simplejwt.authentication.JWTAuthentication",
+        
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 
 }
+
+AUTHENTICATION_BACKENDS = [ 
+    'westudy.auth.UniversityAuthenticationBackend',  # Backend personalizado de University
+    'django.contrib.auth.backends.ModelBackend', # Backend por defecto de Django
+]
 
 # Django-Spectacular
 

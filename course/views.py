@@ -8,8 +8,9 @@ from westudy.models import Course, University, Modality, Category, TypeOfProgram
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status, serializers
+from django.db.models import Prefetch
 import datetime
-from westudy.permissions import RegisterWithoutAuthPermission, IsAdminUser
+from westudy.permissions import RegisterWithoutAuthPermission, IsAdminUser, IsUniversityAdmin
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import F, ExpressionWrapper, fields
 
@@ -19,7 +20,7 @@ from .serializers import (
 )
 
 class CourseCreateView(generics.CreateAPIView):
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
     serializer_class = CourseCreateSerializer
 
     def perform_create(self, serializer):
@@ -66,23 +67,25 @@ class CourseDetailView(generics.RetrieveAPIView):
 
     def get_object(self):
         course_id = self.kwargs.get('id')
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            raise serializers.ValidationError('Course not found')
+        course = get_object_or_404(Course, id=course_id)
         return course
 
 class CourseUpdateView(generics.UpdateAPIView):
     """ Update a course """
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
     serializer_class = CourseSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            return Course.objects.all()
+
     def get_object(self):
+        queryset = self.get_queryset()
         course_id = self.kwargs.get('id')
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            raise serializers.ValidationError('Course not found')
+        course = generics.get_object_or_404(queryset, id=course_id)
         return course
 
     def update(self, request, *args, **kwargs):
@@ -96,15 +99,20 @@ class CourseUpdateView(generics.UpdateAPIView):
             
 class CourseDeleteView(generics.DestroyAPIView):
     """ Delete a course """
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
     serializer_class = CourseSerializer
 
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            return Course.objects.all()
+
     def get_object(self):
+        queryset = self.get_queryset()
         course_id = self.kwargs.get('id')
-        try:
-            course = Course.objects.get(id=course_id)
-        except Course.DoesNotExist:
-            raise serializers.ValidationError('Course not found')
+        course = generics.get_object_or_404(queryset, id=course_id)
         return course
 
     def delete(self, request, *args, **kwargs):
@@ -112,17 +120,21 @@ class CourseDeleteView(generics.DestroyAPIView):
         course.delete()
         return Response({'message': 'Course deleted'}, status=status.HTTP_200_OK)
 
-
-# Relationships
-
-
 class CategoryAssignmentSerializer(APIView):
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
 
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            return Course.objects.all()
+    
     def post(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         course_id = kwargs.get('course_id')
         category_id = kwargs.get('category_id')
-        course = get_object_or_404(Course, id=course_id)
+        course = get_object_or_404(queryset, id=course_id)
         category = get_object_or_404(Category, id=category_id)
         if category in course.category.all():
             return Response({'message': 'Category already assigned'}, status=status.HTTP_400_BAD_REQUEST)
@@ -132,26 +144,41 @@ class CategoryAssignmentSerializer(APIView):
         return Response({'message': 'Category assigned'}, status=status.HTTP_201_CREATED)
 
 class ModalityAssignmentSerializer(APIView):
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            Course.objects.all()
 
     def post(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         course_id = kwargs.get('course_id')
         modality_id = kwargs.get('modality_id')
-        course = get_object_or_404(Course, id=course_id)
+        course = get_object_or_404(queryset, id=course_id)
         modality = get_object_or_404(Modality, id=modality_id)
         if modality in course.modality.all():
             return Response({'message': 'Modality already assigned'}, status=status.HTTP_400_BAD_REQUEST)
         course.modality.add(modality)
         return Response({'message': 'Modality assigned'}, status=status.HTTP_201_CREATED)
 
-
 class TypeOfProgramAssignmentSerializer(APIView):
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            Course.objects.all()
 
     def post(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         course_id = kwargs.get('course_id')
         type_of_program_id = kwargs.get('type_of_program_id')
-        course = get_object_or_404(Course, id=course_id)
+        course = get_object_or_404(queryset, id=course_id)
         type_of_program = get_object_or_404(TypeOfProgram, id=type_of_program_id)
         if type_of_program in course.type_of_program.all():
             return Response({'message': 'Type of program already assigned'}, status=status.HTTP_400_BAD_REQUEST)
@@ -160,15 +187,21 @@ class TypeOfProgramAssignmentSerializer(APIView):
         type_of_program.save()
         return Response({'message': 'Type of program assigned'}, status=status.HTTP_201_CREATED)
 
-# Delete relationships
-
 class CategoryDeleteAssignmentSerializer(APIView):
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            Course.objects.all()
 
     def delete(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         course_id = kwargs.get('course_id')
         category_id = kwargs.get('category_id')
-        course = get_object_or_404(Course, id=course_id)
+        course = get_object_or_404(queryset, id=course_id)
         category = get_object_or_404(Category, id=category_id)
         if category not in course.category.all():
             return Response({'message': 'Category not assigned'}, status=status.HTTP_400_BAD_REQUEST)
@@ -178,12 +211,20 @@ class CategoryDeleteAssignmentSerializer(APIView):
         return Response({'message': 'Category deleted'}, status=status.HTTP_200_OK)
 
 class ModalityDeleteAssignmentSerializer(APIView):
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            Course.objects.all()
 
     def delete(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         course_id = kwargs.get('course_id')
         modality_id = kwargs.get('modality_id')
-        course = get_object_or_404(Course, id=course_id)
+        course = get_object_or_404(queryset, id=course_id)
         modality = get_object_or_404(Modality, id=modality_id)
         if modality not in course.modality.all():
             return Response({'message': 'Modality not assigned'}, status=status.HTTP_400_BAD_REQUEST)
@@ -191,12 +232,20 @@ class ModalityDeleteAssignmentSerializer(APIView):
         return Response({'message': 'Modality deleted'}, status=status.HTTP_200_OK)
 
 class TypeOfProgramDeleteAssignmentSerializer(APIView):
-    permission_classes = [IsAdminUser]  # Permisos
+    permission_classes = [IsUniversityAdmin]  # Permisos
+
+    def get_queryset(self):
+        user = self.request.user
+        if isinstance(user, University):
+            return Course.objects.filter(university=user)
+        else:
+            Course.objects.all()
 
     def delete(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
         course_id = kwargs.get('course_id')
         type_of_program_id = kwargs.get('type_of_program_id')
-        course = get_object_or_404(Course, id=course_id)
+        course = get_object_or_404(queryset, id=course_id)
         type_of_program = get_object_or_404(TypeOfProgram, id=type_of_program_id)
         if type_of_program not in course.type_of_program.all():
             return Response({'message': 'Type of program not assigned'}, status=status.HTTP_400_BAD_REQUEST)
@@ -205,16 +254,12 @@ class TypeOfProgramDeleteAssignmentSerializer(APIView):
         type_of_program.save()
         return Response({'message': 'Type of program deleted'}, status=status.HTTP_200_OK)
 
-
-#filters
-
 class CourseFilterView(generics.ListAPIView):
     authentication_classes = []
     permission_classes = [RegisterWithoutAuthPermission] # Permisos
     serializer_class = CourseSerializer
     pagination_class = PageNumberPagination
     pagination_class.page_size = 10
-    
     
     def get_queryset(self):
         queryset = Course.objects.all()

@@ -6,7 +6,7 @@ from django.contrib.auth import (
     get_user_model,
     authenticate,
 )
-from westudy.models import Course, TypeOfProgram
+from westudy.models import Course, TypeOfProgram, User
 from rest_framework.response import Response
 from rest_framework import status, serializers
 from rest_framework.views import APIView
@@ -92,7 +92,7 @@ class Login(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
-        user = authenticate(email=email, password=password)
+        user = authenticate(email=email, password=password, model=User)
 
         if user:
             login_serializer = self.serializer_class(data=request.data)

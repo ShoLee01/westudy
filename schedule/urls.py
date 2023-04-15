@@ -8,7 +8,7 @@ from schedule import views
 app_name = "schedule"
 
 urlpatterns = [
-    path('create/<int:id>/', views.ScheduleCreateView.as_view(), name='create'),
+    path('create/course/<int:id>/', views.ScheduleCreateView.as_view(), name='create'),
     path('', views.ScheduleListView.as_view(), name='list'),
     path('<int:id>/', views.ScheduleGetView.as_view(), name='get'),
     path('update/<int:id>/', views.ScheduleUpdateView.as_view(), name='update'),

@@ -3,33 +3,50 @@ from django.contrib.auth import (
     authenticate,
 )
 from django.utils.translation import gettext as _ # This is used to translate the error messages
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework import serializers
-from rest_framework.response import Response
-from rest_framework import status
+import uuid
+from django.core.exceptions import ValidationError
+from university.university_tokens import UniversityAccessToken
 from westudy.models import University
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 """ from drf_extra_fields.fields import Base64ImageField """
+
+
+class UniversitySerializerBasic(serializers.ModelSerializer):
+    """Serializer for university objects"""
+
+    class Meta:
+        model = University
+        fields = ['name', 'background_image', 'global_ranking', 'national_level_ranking', 'latin_american_ranking', 'country', 'city', 'logo']
+        read_only_fields = ('id',)
+        extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
 
 
 class UniversitySerializer(serializers.ModelSerializer):
     """Serializer for university objects"""
     # background_image = Base64ImageField(required=False, allow_null=True)
-    # logo = Base64ImageField(required=False, allow_null=True)
+    # logo = Base64ImageField(required=False, allow_null=True) 
+    class Meta: 
+        model = University
+        fields = ['id','email', 'name', 'password', 'background_image', 'verified', 'global_ranking', 'national_level_ranking', 'latin_american_ranking', 'number_of_courses', 'country', 'city', 'logo']
+        read_only_fields = ('id',)
+        extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
+
+
+class UniversitySerializerCode(serializers.ModelSerializer):
+    activation_code = serializers.CharField(required=True)
+
     class Meta:
         model = University
-        fields = "__all__"
-        read_only_fields = ('id',)
+        fields = ['name', 'activation_code']
+        read_only_fields = ('name',)
 
-    def list(self, request):
-        queryset = University.objects.all()
-        print(queryset)
-        serializer = UniversitySerializer(queryset, many=True)
-        return Response(serializer.data)
+    def validate_activation_code(self, value):
+        try:
+            uuid.UUID(value)
+        except ValueError:
+            raise ValidationError('Invalid UUID format')
+        return value
 
-    def create(self, validated_data):
-        """Create a new university"""
-        university = University.objects.create(**validated_data)
-        if university:
-            return Response(status=status.HTTP_201_CREATED)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+
 
