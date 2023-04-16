@@ -6,14 +6,15 @@ from functools import reduce
 from django.shortcuts import get_object_or_404
 from westudy.models import Course, University, Modality, Category, TypeOfProgram
 from rest_framework.response import Response
+from django.db.models import Q
 from rest_framework.views import APIView
 from rest_framework import status, serializers
-from django.db.models import Prefetch
 import datetime
 from westudy.permissions import RegisterWithoutAuthPermission, IsAdminUser, IsUniversityAdmin
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import F, ExpressionWrapper, fields
-
+import boto3
+from app import settings
 from .serializers import (
     CourseSerializer,
     CourseCreateSerializer
@@ -117,6 +118,14 @@ class CourseDeleteView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         course = self.get_object()
+        session = boto3.Session(
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+        s3 = session.resource('s3')
+        bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        bucket.Object(course.background_image.name).delete()
         course.delete()
         return Response({'message': 'Course deleted'}, status=status.HTTP_200_OK)
 
@@ -267,6 +276,7 @@ class CourseFilterView(generics.ListAPIView):
         category = self.request.query_params.getlist('category', [])
         modality = self.request.query_params.getlist('modality', [])
         type_of_program = self.request.query_params.getlist('typeofprogram', [])
+        shift = self.request.query_params.getlist('shift', [])
         min_price = self.request.query_params.get('min_price', None)
         max_price = self.request.query_params.get('max_price', None)
         min_duration = self.request.query_params.get('min_duration', None)
@@ -280,6 +290,14 @@ class CourseFilterView(generics.ListAPIView):
             queryset = reduce(lambda qs, p: qs & qs.filter(modality=p), modality, queryset)
         if type_of_program:
             queryset = reduce(lambda qs, p: qs & qs.filter(type_of_program=p), type_of_program, queryset)
+        if shift:
+            #shift = ['Tarde', 'Noche']
+            q_objects = Q()  # Objeto Q inicial vacío
+            # Iterar sobre la lista de palabras y agregar Q objects con operador OR
+            for x in shift:
+                q_objects &= Q(shifts__shift__icontains=x)
+            #queryset = queryset.filter(shifts__shift__icontains__in=shift)
+            queryset = queryset.filter(q_objects)
 
         if min_price is not None:
             queryset = queryset.filter(price__gte=min_price)

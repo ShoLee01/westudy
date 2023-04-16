@@ -90,8 +90,6 @@ class Course(models.Model):
     number_of_stars = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0)
     start_of_course = models.DateField(null=True)
     end_of_course = models.DateField(null=True)
-    #start_time = models.CharField(max_length=100, null=False)
-    #completion_time = models.CharField(max_length=100, null=False)
     discount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     country = models.CharField(max_length=100, null=False)
@@ -115,15 +113,6 @@ class Shifts(models.Model):
 
     def __str__(self):
         return self.name
-    
-class Schedule(models.Model):
-    name = models.CharField(max_length=100, null=False)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
-
-    def __str__(self):
-        return self.name
-
-
 
 class User(AbstractBaseUser, PermissionsMixin):
         profile = models.ImageField(blank='', default="", upload_to='profile/',null=True)

@@ -6,6 +6,7 @@ from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import (
     authenticate,
 )
+import logging
 from westudy.models import University, User
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -13,10 +14,10 @@ from rest_framework_simplejwt.views import TokenViewBase
 from rest_framework import status
 from westudy.permissions import RegisterWithoutAuthPermission, IsAdminUser, IsUniversityAdmin
 from rest_framework.pagination import PageNumberPagination
-
+from app import settings
 from rest_framework_simplejwt.views import TokenObtainPairView
 from westudy.tokens import UniversityTokenObtainPairSerializer
-
+import boto3
 from .serializers import (
     UniversitySerializer, UniversitySerializerBasic, UniversitySerializerCode
 )
@@ -125,11 +126,20 @@ class UniversityDeleteView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         university = self.get_object()
-        if university.exists():
-            university.delete()
-            return Response({'message': 'University deleted'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'message': 'University not found'}, status=status.HTTP_404_NOT_FOUND)
+        logging.basicConfig(level=logging.DEBUG)
+        session = boto3.Session(
+                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                region_name=settings.AWS_S3_REGION_NAME
+            )
+        s3 = session.resource('s3')
+        bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        bucket.Object(university.background_image.name).delete()
+        bucket.Object(university.logo.name).delete()
+        # Elimina el objeto del modelo de la base de datos
+        university.delete()
+        return Response({'message': 'University deleted'}, status=status.HTTP_200_OK)
+
         
 
 class InactiveUniversitiesView(generics.ListAPIView):

@@ -57,7 +57,6 @@ PROJECT_APPS = [
     "category",
     "modality",
     "typeofprogram",
-    "schedule",
     "shift",
 ]
 
@@ -251,6 +250,10 @@ SIMPLE_JWT = {
 AWS_ACCESS_KEY_ID = 'AKIA5F5H5ZWNXEPFGFGX'
 AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'westudyglobal'
+AWS_CUSTOME_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
 AWS_S3_SIGNATURE_NAME = 's3v4',
 AWS_S3_REGION_NAME = 'us-east-1'
 AWS_S3_FILE_OVERWRITE = False
