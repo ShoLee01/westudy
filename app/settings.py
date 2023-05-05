@@ -26,10 +26,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "django-insecure-bc9)h+z&=ikl8z14hhi_ya1reb@91*a+)0r&0()!*2%y7ps1(&"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+#DEBUG = True
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = 'RENDER' not in os.environ
 # 'api.westudy.global', '3.85.123.242', 
 ALLOWED_HOSTS = ['*','localhost',]
-
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
 # CORS Settings
 
 CORS_ALLOW_ALL_ORIGINS = True
