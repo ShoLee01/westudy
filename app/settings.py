@@ -27,8 +27,8 @@ SECRET_KEY = "django-insecure-bc9)h+z&=ikl8z14hhi_ya1reb@91*a+)0r&0()!*2%y7ps1(&
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
-ALLOWED_HOSTS = ['api.westudy.global', '3.85.123.242', 'localhost']
+# 'api.westudy.global', '3.85.123.242', 
+ALLOWED_HOSTS = ['*','localhost',]
 
 # CORS Settings
 
@@ -36,6 +36,19 @@ CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 
 # Application definition
 
@@ -74,14 +87,14 @@ INSTALLED_APPS = INTERNAL_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
-    "django.middleware.common.CommonMiddleware",
 ]
+
 
 ROOT_URLCONF = "app.urls"
 
@@ -110,10 +123,10 @@ WSGI_APPLICATION = "app.wsgi.application"
 DATABASES = {
     "default": {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'westudydb',
-        'USER': 'westudyaccesspro',
-        'PASSWORD': 'O1PpjDaokF4oS9XcbjIb2fQlQ',
-        'HOST': 'westudyapp.celjmnegcr8z.us-east-1.rds.amazonaws.com',
+        'NAME': 'westudyapp',
+        'USER': 'westudyapp_user',
+        'PASSWORD': 'Qj2DDbzMrBPaSnVjz1ZXuznofBMeHb8q',
+        'HOST': 'dpg-cha7fsak728r885dk8h0-a.oregon-postgres.render.com',
         'PORT': '5432',
     },
     "old_default": {

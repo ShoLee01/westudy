@@ -17,9 +17,24 @@ class UniversitySerializerBasic(serializers.ModelSerializer):
 
     class Meta:
         model = University
-        fields = ['name', 'background_image', 'global_ranking', 'national_level_ranking', 'latin_american_ranking', 'country', 'city', 'logo']
+        fields = ['name','background_image', 'global_ranking', 'national_level_ranking', 'latin_american_ranking', 'country', 'city', 'logo']
         read_only_fields = ('id',)
-        extra_kwargs = {"password": {"write_only": True, "min_length": 5}}
+
+class UniversityRegisterCreate(serializers.ModelSerializer):
+    """Serializer for university objects"""
+
+    class Meta:
+        model = University
+        fields = ['email','name','background_image', 'country', 'city', 'logo', 'password', 'verified']
+        read_only_fields = ('id',)
+
+class UniversityRegisteredAccounts(serializers.ModelSerializer):
+    """Serializer for university objects"""
+
+    class Meta:
+        model = University
+        fields = ['email']
+        read_only_fields = ('id',)
 
 
 class UniversitySerializer(serializers.ModelSerializer):

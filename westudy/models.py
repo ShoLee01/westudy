@@ -42,9 +42,6 @@ class Modality(models.Model):
 
     def __str__(self):
         return self.name
-    
-
-
 
 
 class Category(models.Model):
@@ -82,7 +79,6 @@ class University(models.Model):
 
 class Course(models.Model):
     title = models.CharField(max_length=100, null=False)
-    program_type = models.CharField(max_length=100, null=False)
     link = models.TextField(null=True)
     background_image = models.ImageField(blank='', default="", upload_to='background/',null=True)
     institution = models.CharField(max_length=100, null=False)
@@ -94,6 +90,7 @@ class Course(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     country = models.CharField(max_length=100, null=False)
     city = models.CharField(max_length=100, null=False)
+    registration_date = models.DateField(null=True)
     language = models.CharField(max_length=100, null=False)
     number_of_teachers = models.IntegerField(null=True)
     accept_installments = models.BooleanField(default=False)

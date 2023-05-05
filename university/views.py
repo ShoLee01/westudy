@@ -6,7 +6,9 @@ from django.contrib.auth.backends import BaseBackend
 from django.contrib.auth import (
     authenticate,
 )
+from django.http import Http404
 import logging
+from django.contrib.auth.hashers import make_password
 from westudy.models import University, User
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -19,7 +21,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from westudy.tokens import UniversityTokenObtainPairSerializer
 import boto3
 from .serializers import (
-    UniversitySerializer, UniversitySerializerBasic, UniversitySerializerCode
+    UniversitySerializer, UniversitySerializerBasic, 
+    UniversitySerializerCode, UniversityRegisteredAccounts,
+    UniversityRegisterCreate
 )
 
 class UniversityListView(generics.ListAPIView):
@@ -41,6 +45,21 @@ class UniversityGetView(generics.RetrieveAPIView):
         university_id = self.kwargs.get('id')
         university = get_object_or_404(University, id=university_id)
         return university
+    
+
+class UniversityRegisteredAccountsView(generics.CreateAPIView):
+    authentication_classes = []
+    permission_classes = [RegisterWithoutAuthPermission]  # Permisos
+    serializer_class = UniversityRegisteredAccounts
+
+    def create(self, request, *args, **kwargs):
+        university_email = request.data.get('email')
+        try:
+            university = University.objects.get(email=university_email)
+            return Response({'message': 'University exists', 'university': True}, status=status.HTTP_200_OK)
+        except University.DoesNotExist:
+            return Response({'message': 'University not found', 'university': False}, status=status.HTTP_200_OK)
+
     
 class UniversityGetLoginView(generics.RetrieveAPIView):
     permission_classes = [IsUniversityAdmin]  # Permisos
@@ -66,7 +85,7 @@ class UniversityCreateView(generics.CreateAPIView):
     """ Create a new university """
     authentication_classes = []
     permission_classes = [RegisterWithoutAuthPermission]  # Permisos
-    serializer_class = UniversitySerializer
+    serializer_class = UniversityRegisterCreate
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -95,16 +114,18 @@ class UniversityUpdateView(generics.UpdateAPIView):
 
     def update(self, request, *args, **kwargs):
         university = self.get_object()
+        if 'password' in request.data:
+            # Cifra la contraseña según la contraseña ingresada
+            encrypted_password = make_password(request.data['password'])
+            request.data['password'] = encrypted_password
         serializer = self.get_serializer(university, data=request.data, partial=True)
 
         if serializer.is_valid():
-            if 'password' in request.data:
-                university.set_password(request.data['password'])
-
             serializer.save()
             return Response({'message': 'University updated'}, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class UniversityDeleteView(generics.DestroyAPIView):
     """ Delete a university """
@@ -149,6 +170,7 @@ class InactiveUniversitiesView(generics.ListAPIView):
         
 class UniversityActivateView(generics.CreateAPIView):
     """ Activate a university """
+    authentication_classes = []
     permission_classes = [RegisterWithoutAuthPermission]  # Permisos
     serializer_class = UniversitySerializerCode
     queryset = University.objects.all()
@@ -162,10 +184,10 @@ class UniversityActivateView(generics.CreateAPIView):
             try:
                 university = University.objects.get(activation_code=activation_code)
             except University.DoesNotExist:
-                return Response({'message': 'Invalid activation code'}, status=status.HTTP_404_NOT_FOUND)
+                return Response({'message': 'Invalid activation code'}, status=status.HTTP_200_OK)
 
             if university.is_active:
-                return Response({'message': 'University is already active'}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({'message': 'University is already active'}, status=status.HTTP_200_OK)
 
             university.is_active = True
             university.save()

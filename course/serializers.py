@@ -11,15 +11,15 @@ from drf_extra_fields.fields import Base64ImageField
 
 class CourseSerializer(serializers.ModelSerializer):
     """Serializer for the Course objects"""
-    background_image = Base64ImageField(required=False, allow_null=True)
+    #background_image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Course
         fields = (
-            'id', 'title', 'program_type', 'background_image', 'institution', 'requirements','number_of_stars',
+            'id', 'title','link', 'background_image', 'institution', 'requirements','number_of_stars',
             'start_of_course', 'end_of_course', 'discount', 'price',
-            'country', 'city', 'language', 'number_of_teachers', 'accept_installments',
-            'category', 'type_of_program'  # Incluir las relaciones muchos a muchos
+            'country', 'city', 'registration_date', 'language', 'number_of_teachers', 'accept_installments',
+            'category', 'type_of_program','modality'  # Incluir las relaciones muchos a muchos
         )
         read_only_fields = ('id',)
         depth = 1  # Indicar el nivel de profundidad deseado en las relaciones
@@ -27,8 +27,8 @@ class CourseSerializer(serializers.ModelSerializer):
 
 class CourseCreateSerializer(serializers.ModelSerializer):
     """Serializer for the Category objects"""
-    background_image = Base64ImageField(required=False, allow_null=True)
+    #background_image = Base64ImageField(required=False, allow_null=True)
     class Meta:
         model = Course
-        fields = ('id', 'title', 'program_type','number_of_stars', 'background_image', 'requirements', 'start_of_course', 'end_of_course', 'discount', 'price', 'country', 'city', 'language', 'number_of_teachers', 'accept_installments',)
+        fields = ('id', 'title','link', 'background_image', 'registration_date','requirements', 'start_of_course', 'end_of_course', 'discount', 'price', 'country', 'city', 'language', 'number_of_teachers', 'accept_installments',)
         read_only_fields = ('id',)

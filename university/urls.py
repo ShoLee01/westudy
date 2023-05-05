@@ -18,6 +18,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path("", views.UniversityListView.as_view(), name="list"),
     path("create/", views.UniversityCreateView.as_view(), name="create"),
+    path("registered_accounts/", views.UniversityRegisteredAccountsView.as_view(), name="registered_accounts"),
     path("update/<int:id>", views.UniversityUpdateView.as_view(), name="update"),
     path("delete/<int:id>", views.UniversityDeleteView.as_view(), name="delete"),
     path('active/', views.UniversityActivateView.as_view(), name='active_universities'),

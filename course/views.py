@@ -28,6 +28,8 @@ class CourseCreateView(generics.CreateAPIView):
         university_id = self.kwargs.get('id')
         try:
             university = University.objects.get(id=university_id)
+            university.number_of_courses = university.number_of_courses + 1
+            university.save()
             serializer.save(university=university,institution=university.name)
             return Response({'message': 'Course created'}, status=status.HTTP_201_CREATED)
         except University.DoesNotExist:
@@ -35,7 +37,8 @@ class CourseCreateView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         response = super().create(request, *args, **kwargs)
-        response.data = {'message': 'Course created'}
+        # response con el id del curso creado
+        response.data = {'message': 'Course created', 'id': response.data['id']}
         return response
 
 class CourseListByUniversityView(generics.ListAPIView):
@@ -118,14 +121,19 @@ class CourseDeleteView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         course = self.get_object()
-        session = boto3.Session(
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                region_name=settings.AWS_S3_REGION_NAME
-            )
-        s3 = session.resource('s3')
-        bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
-        bucket.Object(course.background_image.name).delete()
+        # eliminar number_of_courses de la universidad
+        university = course.university
+        university.number_of_courses = university.number_of_courses - 1
+        university.save()
+        if course.background_image:
+            session = boto3.Session(
+                    aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                    region_name=settings.AWS_S3_REGION_NAME
+                )
+            s3 = session.resource('s3')
+            bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+            bucket.Object(course.background_image.name).delete()
         course.delete()
         return Response({'message': 'Course deleted'}, status=status.HTTP_200_OK)
 
