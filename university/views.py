@@ -87,13 +87,22 @@ class UniversityCreateView(generics.CreateAPIView):
     permission_classes = [RegisterWithoutAuthPermission]  # Permisos
     serializer_class = UniversityRegisterCreate
 
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
+    def perform_create(self, serializer):
         if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'University created'}, status=status.HTTP_201_CREATED)
+            instance = serializer.save()
+            return instance
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        instance = self.perform_create(serializer)
+        if isinstance(instance, Response):
+            return instance
+        headers = self.get_success_headers(serializer.data)
+        response_data = {'message': 'University created', 'university_id': instance.id}
+        return Response(response_data, status=status.HTTP_201_CREATED, headers=headers)
+
 
 class UniversityUpdateView(generics.UpdateAPIView):
     permission_classes = [IsUniversityAdmin]  # Permisos
@@ -147,16 +156,17 @@ class UniversityDeleteView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         university = self.get_object()
-        logging.basicConfig(level=logging.DEBUG)
-        session = boto3.Session(
-                aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                region_name=settings.AWS_S3_REGION_NAME
-            )
-        s3 = session.resource('s3')
-        bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
-        bucket.Object(university.background_image.name).delete()
-        bucket.Object(university.logo.name).delete()
+        #logging.basicConfig(level=logging.DEBUG)
+
+        #session = boto3.Session(
+                #aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+                #aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+                #region_name=settings.AWS_S3_REGION_NAME
+            #)
+        #s3 = session.resource('s3')
+        #bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
+        #bucket.Object(university.background_image.name).delete()
+        #bucket.Object(university.logo.name).delete()
         # Elimina el objeto del modelo de la base de datos
         university.delete()
         return Response({'message': 'University deleted'}, status=status.HTTP_200_OK)

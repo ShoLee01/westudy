@@ -104,6 +104,7 @@ class Course(models.Model):
 class Shifts(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
     id_university = models.IntegerField(null=False, default=0)
+    weekday = models.CharField(max_length=100, null=True)
     shift = models.CharField(max_length=100, null=True)
     start_time = models.TimeField(null=False)
     end_time = models.TimeField(null=False)

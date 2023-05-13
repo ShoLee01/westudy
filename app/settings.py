@@ -63,7 +63,6 @@ INTERNAL_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    
 ]
 
 PROJECT_APPS = [
@@ -84,6 +83,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "drf_spectacular",
     "corsheaders",
+    "storages",
 ]
 
 INSTALLED_APPS = INTERNAL_APPS + THIRD_PARTY_APPS + PROJECT_APPS
@@ -264,7 +264,15 @@ SIMPLE_JWT = {
     'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
 }
 
-AWS_ACCESS_KEY_ID = 'AKIA5F5H5ZWNXEPFGFGX'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+# Configuración para Backblaze B2
+AWS_ACCESS_KEY_ID = '004117bd9eed44d0000000002'
+AWS_SECRET_ACCESS_KEY = 'K0048Lr5PwOZbYDI1EP5wzU/z59TtaI'
+AWS_STORAGE_BUCKET_NAME = 'westudystorage'
+AWS_S3_ENDPOINT_URL = 'https://s3.us-west-004.backblazeb2.com'
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.us-west-004.backblazeb2.com' % AWS_STORAGE_BUCKET_NAME
+
+""" AWS_ACCESS_KEY_ID = 'AKIA5F5H5ZWNXEPFGFGX'
 AWS_SECRET_ACCESS_KEY = '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'
 AWS_STORAGE_BUCKET_NAME = 'westudyglobal'
 AWS_CUSTOME_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
@@ -276,5 +284,8 @@ AWS_S3_REGION_NAME = 'us-east-1'
 AWS_S3_FILE_OVERWRITE = False
 AWS_DEFAULT_ACL =  None
 AWS_S3_VERITY = True
-DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage' """
+
+
+
 

@@ -9,5 +9,5 @@ class ShiftSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Shifts
-        fields = ('id', 'shift', 'start_time', 'end_time','id_university',)
+        fields = ('id', 'shift', 'weekday', 'start_time', 'end_time','id_university',)
         read_only_fields = ('id','shift','id_university')
