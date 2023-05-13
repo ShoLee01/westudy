@@ -78,7 +78,7 @@ class University(models.Model):
         super(University, self).save(*args, **kwargs)
 
 class Course(models.Model):
-    title = models.CharField(max_length=100, null=False)
+    title = models.CharField(max_length=1000, null=False)
     link = models.TextField(null=True)
     background_image = models.ImageField(blank='', default="", upload_to='background/',null=True)
     institution = models.CharField(max_length=100, null=False)
