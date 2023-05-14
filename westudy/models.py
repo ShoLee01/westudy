@@ -84,6 +84,7 @@ class Course(models.Model):
     institution = models.CharField(max_length=100, null=False)
     requirements = models.BooleanField(default=False)
     number_of_stars = models.DecimalField(max_digits=10, decimal_places=2, null=True, default=0)
+    numer_of_months = models.IntegerField(null=True)
     start_of_course = models.DateField(null=True)
     end_of_course = models.DateField(null=True)
     discount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
