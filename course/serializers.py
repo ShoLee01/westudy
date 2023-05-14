@@ -30,5 +30,5 @@ class CourseCreateSerializer(serializers.ModelSerializer):
     #background_image = Base64ImageField(required=False, allow_null=True)
     class Meta:
         model = Course
-        fields = ('id', 'title','link', 'background_image', 'registration_date','requirements', 'start_of_course', 'end_of_course', 'discount', 'price', 'country', 'city', 'language', 'number_of_teachers', 'accept_installments',)
+        fields = ('id', 'title','link', 'background_image','numer_of_months', 'registration_date','requirements', 'start_of_course', 'end_of_course', 'discount', 'price', 'country', 'city', 'language', 'number_of_teachers', 'accept_installments',)
         read_only_fields = ('id',)
