@@ -31,7 +31,8 @@ class CategoryListView(generics.ListAPIView):
     serializer_class = CategorySerializer
 
     def get_queryset(self):
-        return Category.objects.all()
+        """ Return all categories order by name alphabetically """
+        return Category.objects.all().order_by('name')
 
 
 class CategoryDetailView(generics.RetrieveAPIView):

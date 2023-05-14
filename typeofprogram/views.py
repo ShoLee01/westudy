@@ -28,7 +28,7 @@ class TypeOfProgramListView(generics.ListAPIView):
     serializer_class = TypeOfProgramSerializer
 
     def get_queryset(self):
-        return TypeOfProgram.objects.all()
+        return TypeOfProgram.objects.all().order_by('name')
 
 
 class TypeOfProgramDetailView(generics.RetrieveAPIView):
