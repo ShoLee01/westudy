@@ -20,6 +20,14 @@ from .serializers import (
     CourseCreateSerializer
 )
 
+
+class CustomPageNumberPagination(PageNumberPagination):
+    page_size = 8
+
+    def get_page_size(self, request):
+        return self.page_size
+
+
 class CourseCreateView(generics.CreateAPIView):
     permission_classes = [IsUniversityAdmin]  # Permisos
     serializer_class = CourseCreateSerializer
@@ -45,6 +53,8 @@ class CourseListByUniversityView(generics.ListAPIView):
     authentication_classes = []
     permission_classes = [RegisterWithoutAuthPermission] # Permisos
     serializer_class = CourseSerializer
+    pagination_class = CustomPageNumberPagination
+    pagination_class.page_size = 8
 
     def get_queryset(self):
         university_id = self.kwargs.get('id')
