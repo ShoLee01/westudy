@@ -138,12 +138,12 @@ class CourseDeleteView(generics.DestroyAPIView):
         if course.background_image:
             session = boto3.Session(
                     aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-                    region_name=settings.AWS_S3_REGION_NAME
+                    aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
                 )
-            s3 = session.resource('s3')
+            s3 = session.resource('s3', endpoint_url=settings.AWS_S3_ENDPOINT_URL)
             bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
             bucket.Object(course.background_image.name).delete()
+
         course.delete()
         return Response({'message': 'Course deleted'}, status=status.HTTP_200_OK)
 
