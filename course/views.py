@@ -178,7 +178,7 @@ class ModalityAssignmentSerializer(APIView):
         if isinstance(user, University):
             return Course.objects.filter(university=user)
         else:
-            Course.objects.all()
+            return Course.objects.all()
 
     def post(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -190,6 +190,7 @@ class ModalityAssignmentSerializer(APIView):
             return Response({'message': 'Modality already assigned'}, status=status.HTTP_400_BAD_REQUEST)
         course.modality.add(modality)
         return Response({'message': 'Modality assigned'}, status=status.HTTP_201_CREATED)
+
 
 class TypeOfProgramAssignmentSerializer(APIView):
     permission_classes = [IsUniversityAdmin]  # Permisos

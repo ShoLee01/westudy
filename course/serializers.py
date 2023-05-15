@@ -16,7 +16,7 @@ class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = (
-            'id', 'title','link', 'background_image', 'institution', 'requirements','number_of_stars',
+            'id', 'title','link','numer_of_months', 'background_image', 'institution', 'requirements','number_of_stars',
             'start_of_course', 'end_of_course', 'discount', 'price',
             'country', 'city', 'registration_date', 'language', 'number_of_teachers', 'accept_installments',
             'category', 'type_of_program','modality'  # Incluir las relaciones muchos a muchos
