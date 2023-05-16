@@ -4,14 +4,14 @@ from django.contrib.auth import (
 )
 from django.utils.translation import gettext as _ # This is used to translate the error messages
 from rest_framework import serializers
-from rest_framework.response import Response
-from rest_framework import status
-from westudy.models import Course, Category
-from drf_extra_fields.fields import Base64ImageField
+from westudy.models import Course, Shifts
+from shift.serializers import (
+    ShiftSerializer
+)
 
 class CourseSerializer(serializers.ModelSerializer):
-    """Serializer for the Course objects"""
-    #background_image = Base64ImageField(required=False, allow_null=True)
+    shifts = ShiftSerializer(many=True, read_only=True)
+    shifts_summary = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -19,10 +19,20 @@ class CourseSerializer(serializers.ModelSerializer):
             'id', 'title','link','numer_of_months', 'background_image', 'institution', 'requirements','number_of_stars',
             'start_of_course', 'end_of_course', 'discount', 'price',
             'country', 'city', 'registration_date', 'language', 'number_of_teachers', 'accept_installments',
-            'category', 'type_of_program','modality'  # Incluir las relaciones muchos a muchos
+            'category', 'type_of_program','modality',  # Incluir las relaciones muchos a muchos
+            'shifts', 'shifts_summary'  # Añade los turnos (Shifts) aquí
         )
         read_only_fields = ('id',)
         depth = 1  # Indicar el nivel de profundidad deseado en las relaciones
+
+    def get_shifts_summary(self, obj):
+        shifts = Shifts.objects.filter(course=obj)
+        list_shift = []
+        for element in shifts:
+            list_shift += element.shift.split(' - ')
+        list_shift = list(set(list_shift))  # Eliminar duplicados
+        shifts_summary = ', '.join(list_shift)
+        return shifts_summary
 
 
 class CourseCreateSerializer(serializers.ModelSerializer):

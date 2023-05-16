@@ -28,32 +28,8 @@ class ShiftListView(generics.ListAPIView):
             else:
                 return Shifts.objects.filter(course=course)
         except Course.DoesNotExist:
-            raise serializers.ValidationError('Course not found')
+            raise serializers.ValidationError('Shifts not found')
 
-""" class ShiftByCourseListView(generics.ListAPIView):
-    authentication_classes = []
-    permission_classes = [RegisterWithoutAuthPermission] # Permisos
-    serializer_class = ShiftSerializer
-    
-    def get_queryset(self):
-        course_id = self.kwargs.get('id')
-        user = self.request.user
-        try:
-            course = Course.objects.get(id=course_id)
-            if isinstance(user, University):
-                queryset = Shifts.objects.filter(course=course, id_university=user.id)
-            else:
-                queryset = Shifts.objects.filter(course=course)
-            list_shift = []
-            for element in queryset:
-                list_shift.append(element.shift)
-            list_shift = set(list_shift)
-            shifts = ', '.join(list_shift)
-            response_data = {"shifts": shifts}
-            response = Response(response_data, status=status.HTTP_200_OK)
-            return JSONRenderer().render(response.data)  # Renderizar el contenido de la respuesta antes de devolverla
-        except Course.DoesNotExist:
-            return Response({"error": "Course not found"}, status=status.HTTP_404_NOT_FOUND) """
         
 class ShiftByCourseListView(APIView):
     authentication_classes = []
@@ -97,6 +73,7 @@ class ShiftCreateView(generics.CreateAPIView):
             raise serializers.ValidationError('Course not found')
         start_time_str = request.data.get('start_time')
         end_time_str = request.data.get('end_time')
+        weekday = request.data.get('weekday')
 
         # Convertir las cadenas de texto a objetos datetime.time
         start_time = datetime.strptime(start_time_str, '%H:%M:%S').time()
@@ -108,7 +85,7 @@ class ShiftCreateView(generics.CreateAPIView):
         if start_time == end_time:
             raise serializers.ValidationError('La hora de inicio debe ser diferente a la hora de fin')
         
-        if Shifts.objects.filter(course=course, start_time=start_time, end_time=end_time).exists():
+        if Shifts.objects.filter(course=course, start_time=start_time, end_time=end_time, weekday=weekday).exists():
             raise serializers.ValidationError('Ya existe un turno con esas horas')
 
 
@@ -171,5 +148,7 @@ class ShiftDeleteView(generics.DestroyAPIView):
 
     def delete(self, request, *args, **kwargs):
         shift = self.get_queryset()
+        if shift.count() == 0:
+            return Response({'message': 'Shift not found'}, status=status.HTTP_404_NOT_FOUND)
         shift.delete()
-        return Response({'message': 'Course deleted'}, status=status.HTTP_200_OK)
+        return Response({'message': 'Shift deleted'}, status=status.HTTP_200_OK)

@@ -103,7 +103,7 @@ class Course(models.Model):
         return self.title
     
 class Shifts(models.Model):
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, null=True, related_name='shifts')
     id_university = models.IntegerField(null=False, default=0)
     weekday = models.CharField(max_length=100, null=True)
     shift = models.CharField(max_length=100, null=True)

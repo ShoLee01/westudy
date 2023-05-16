@@ -4,7 +4,7 @@ from rest_framework import (
 )
 from functools import reduce
 from django.shortcuts import get_object_or_404
-from westudy.models import Course, University, Modality, Category, TypeOfProgram
+from westudy.models import Course, University, Modality, Category, TypeOfProgram, Shifts
 from rest_framework.response import Response
 from django.db.models import Q
 from rest_framework.views import APIView
@@ -60,7 +60,7 @@ class CourseListByUniversityView(generics.ListAPIView):
         university_id = self.kwargs.get('id')
         try:
             university = University.objects.get(id=university_id)
-            return Course.objects.filter(university=university)
+            return Course.objects.filter(university=university).order_by('id')
         except University.DoesNotExist:
             raise serializers.ValidationError('University not found')
 
@@ -72,7 +72,7 @@ class CourseListView(generics.ListAPIView):
     pagination_class.page_size = 10
 
     def get_queryset(self):
-        return Course.objects.all()
+        return Course.objects.all().order_by('id')
 
 class CourseDetailView(generics.RetrieveAPIView):
     authentication_classes = []
@@ -82,7 +82,7 @@ class CourseDetailView(generics.RetrieveAPIView):
     def get_object(self):
         course_id = self.kwargs.get('id')
         course = get_object_or_404(Course, id=course_id)
-        return course
+        return course.order_by('id')
 
 class CourseUpdateView(generics.UpdateAPIView):
     """ Update a course """
@@ -143,6 +143,25 @@ class CourseDeleteView(generics.DestroyAPIView):
             s3 = session.resource('s3', endpoint_url=settings.AWS_S3_ENDPOINT_URL)
             bucket = s3.Bucket(settings.AWS_STORAGE_BUCKET_NAME)
             bucket.Object(course.background_image.name).delete()
+        # Eliminar todas las categorías del curso
+        for category in course.category.all():
+            course.category.remove(category)
+            category.number_of_courses -= 1
+            category.save()
+
+        #Eliminar todos los type of program del curso
+        for type_of_program in course.type_of_program.all():
+            course.type_of_program.remove(type_of_program)
+            type_of_program.number_of_courses -= 1
+            type_of_program.save()
+
+        #Eliminar todos las modalidades del curso
+        for modality in course.modality.all():
+            course.modality.remove(modality)
+            modality.save()
+
+        # Eliminar todos los turnos asociados con el curso
+        course.shifts.all().delete()
 
         course.delete()
         return Response({'message': 'Course deleted'}, status=status.HTTP_200_OK)
