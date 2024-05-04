@@ -129,8 +129,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'westudyapp',
         'USER': 'westudyapp_user',
-        'PASSWORD': 'Qj2DDbzMrBPaSnVjz1ZXuznofBMeHb8q',
-        'HOST': 'dpg-cha7fsak728r885dk8h0-a.oregon-postgres.render.com',
+        'PASSWORD': 'Qj2DfgdfgdfgDbzMrBPaSnVjz1ZXuznofBMeHb8q',
+        'HOST': 'dpg-cha7fsak728rfdgfgfdgf885dk8h0-a.oregon-postgres.render.com',
         'PORT': '5432',
     },
     "old_default": {
@@ -266,8 +266,8 @@ SIMPLE_JWT = {
 
 DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Configuración para Backblaze B2
-AWS_ACCESS_KEY_ID = '004117bd9eed44d0000000002'
-AWS_SECRET_ACCESS_KEY = 'K0048Lr5PwOZbYDI1EP5wzU/z59TtaI'
+AWS_ACCESS_KEY_ID = #'fgdfgfg004117bd9eed44d0000000002'
+AWS_SECRET_ACCESS_KEY = #'dfgfgK0048Lr5PwOZbYDI1EP5wzU/z59TtaI'
 AWS_STORAGE_BUCKET_NAME = 'westudystorage'
 AWS_S3_ENDPOINT_URL = 'https://s3.us-west-004.backblazeb2.com'
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.us-west-004.backblazeb2.com' % AWS_STORAGE_BUCKET_NAME
